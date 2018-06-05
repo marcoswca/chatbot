@@ -208,15 +208,9 @@ def api():
                 result_json["speechResponse"] = split_sentence(template.render(**context))
         logger.info(request_json.get("input"), extra=result_json)
         index = 0
-        tokens = ["on sale", "yes we have"]
-        for token in tokens:
-            for response in result_json["speechResponse"]:
-                index+=1
-                if token.lower() in response.lower():
-                    if(token.lower()=="on sale"):
-                        productsOnSale(result_json, index)
-                    elif(token.lower()=="yes we have"):
-                        searchProducts(result_json, index)
+
+        print result_json["intent"]["name"]
+
         return build_response.build_json(result_json)
     else:
         return abort(400)
