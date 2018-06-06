@@ -78,6 +78,8 @@ scrollToBottom(): void {
 }
 
   render_bubbles(c){
+    console.log(c);
+    
     c.speechResponse.forEach((item, index) => {
       if (index  == 0){
           this.add_to_messages(item,"chat")

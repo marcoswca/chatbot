@@ -23,29 +23,19 @@ synonyms = None
 entity_extraction = None
 from app.products.models import Product
 
-import pymongo
-from pymongo import MongoClient
-client = MongoClient()
-db = client["iky-ai"]
-product_collection = db.product
-
 def productsOnSale(result_json):
     products = Product.objects(onSale=True).limit(5)
     if(products != None):
         for item in products:
             app.logger.info("item %s"%item) 
-            result_json["speechResponse"].append(item['product'])
+            result_json["speechResponse"].append(item["product"])
 
 def searchProduct(result_json):
-    words = result_json["input"].split(" ")
-    products = []
-    finishSearch = False
-    while(finishSearch==False):
-        for i in range(len(words)):
-            products = product_collection.find({"product":{"$regex":words[i]}})
-        finishSearch = True
-    for item in products:
-        app.logger.info(item)
+    search = result_json["extractedParameters"]["product"]
+    if(search != None):
+        products = Product.objects(product__contains=search)
+        for item in products:
+            result_json["speechResponse"][1] = result_json["speechResponse"][1] + str(item["location"])
 
 # Request Handler
 @endpoint.route('/v1', methods=['POST'])
@@ -219,7 +209,9 @@ def api():
 
         if(result_json["intent"]["name"]=="ProductsOnSale"):
             productsOnSale(result_json)
-        elif(result_json["intent"]["name"]=="SearchProduct"):
+        elif(result_json["intent"]["name"]=="product search 1"):
+            searchProduct(result_json)
+        elif(result_json["intent"]["name"]=="product search"):
             searchProduct(result_json)
 
         return build_response.build_json(result_json)
